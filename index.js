@@ -1,3 +1,3 @@
-const Pdf = require("./lib/pdf.js");
+const pdfReader = require("./lib/pdf-reader.js");
 
-module.exports = Pdf;
+module.exports = pdfReader;
