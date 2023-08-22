@@ -1,162 +1,48 @@
-# pdf-parse
+# pdf-parse-fork
 
 **Pure javascript cross-platform module to extract texts from PDFs.**
 
-[![version](https://img.shields.io/npm/v/pdf-parse.svg)](https://www.npmjs.org/package/pdf-parse)
-[![downloads](https://img.shields.io/npm/dt/pdf-parse.svg)](https://www.npmjs.org/package/pdf-parse)
-[![node](https://img.shields.io/node/v/pdf-parse.svg)](https://nodejs.org/)
-[![status](https://gitlab.com/autokent/pdf-parse/badges/master/pipeline.svg)](https://gitlab.com/autokent/pdf-parse/pipelines)
+## Why?
 
-## Similar Packages
-* [pdf2json](https://www.npmjs.com/package/pdf2json) buggy, no support anymore, memory leak, throws non-catchable fatal errors
-* [j-pdfjson](https://www.npmjs.com/package/j-pdfjson) fork of pdf2json
-* [pdf-parser](https://github.com/dunso/pdf-parse) buggy, no tests
-* [pdfreader](https://www.npmjs.com/package/pdfreader) using pdf2json
-* [pdf-extract](https://www.npmjs.com/package/pdf-extract) not cross-platform using xpdf
+This project is based on [pdf-parse](https://gitlab.com/autokent/pdf-parse), which worked fine for me during development, but I've found some problems to run it in production, specially when I tried to use it with AWS's Lambda functions.
+
+The project import's and use the [Mozilla's PDF.js](https://mozilla.github.io/pdf.js/) library on it's latest version.
 
 ## Installation
-`npm install pdf-parse`
- 
-## Basic Usage - Local Files
+
+This package isn't in npm's registry since my intetion with this fork was very specific. But, if you want to try it out, you can install it directly from this repository.
+
+To install this library, just add the following line into your **package.json**'s dependencies section:
 
 ```js
-const fs = require('fs');
-const pdf = require('pdf-parse');
-
-let dataBuffer = fs.readFileSync('path to PDF file...');
-
-pdf(dataBuffer).then(function(data) {
-
-	// number of pages
-	console.log(data.numpages);
-	// number of rendered pages
-	console.log(data.numrender);
-	// PDF info
-	console.log(data.info);
-	// PDF metadata
-	console.log(data.metadata); 
-	// PDF.js version
-	// check https://mozilla.github.io/pdf.js/getting_started/
-	console.log(data.version);
-	// PDF text
-	console.log(data.text); 
-        
-});
+...
+"pdf-parse": "https://github.com/steniowagner/pdf-parse-fork/tarball/<branch|commit>"
+...
 ```
 
-## Basic Usage - HTTP
-You can use [crawler-request](https://www.npmjs.com/package/crawler-request) which uses the `pdf-parse`
+**You can install it directly from a specific branch or choose a specific commit (but I suggest you to always grab the latest commit, though).**
 
-## Exception Handling
+And then, just reinstall your dependencies. That's it!
 
-```js
-const fs = require('fs');
-const pdf = require('pdf-parse');
-
-let dataBuffer = fs.readFileSync('path to PDF file...');
-
-pdf(dataBuffer).then(function(data) {
-	// use data
-})
-.catch(function(error){
-	// handle exceptions
-})
-```
-
-## Extend
-* v1.0.9 and above break pagerender callback [changelog](https://gitlab.com/autokent/pdf-parse/blob/master/CHANGELOG)
-* If you need another format like json, you can change page render behaviour with a callback
-* Check out https://mozilla.github.io/pdf.js/
+## Usage
 
 ```js
-// default render callback
-function render_page(pageData) {
-    //check documents https://mozilla.github.io/pdf.js/
-    let render_options = {
-        //replaces all occurrences of whitespace with standard spaces (0x20). The default value is `false`.
-        normalizeWhitespace: false,
-        //do not attempt to combine same line TextItem's. The default value is `false`.
-        disableCombineTextItems: false
-    }
+const parsePdf = require("pdf-parse");
+const fs = require("fs");
 
-    return pageData.getTextContent(render_options)
-	.then(function(textContent) {
-		let lastY, text = '';
-		for (let item of textContent.items) {
-			if (lastY == item.transform[5] || !lastY){
-				text += item.str;
-			}  
-			else{
-				text += '\n' + item.str;
-			}    
-			lastY = item.transform[5];
-		}
-		return text;
+const dataBuffer = fs.readFileSync("path-to-your-pdf-file");
+
+parsePdf(dataBuffer.buffer)
+	.then(function (data) {
+		// pdf's text content
+		console.log(data);
+	})
+	.catch(function (err) {
+		// some error
+		console.log(err);
 	});
-}
-
-let options = {
-    pagerender: render_page
-}
-
-let dataBuffer = fs.readFileSync('path to PDF file...');
-
-pdf(dataBuffer,options).then(function(data) {
-	//use new format
-});
 ```
-
-## Options
-
-```js
-const DEFAULT_OPTIONS = {
-	// internal page parser callback
-	// you can set this option, if you need another format except raw text
-	pagerender: render_page,
-	
-	// max page number to parse
-	max: 0,
-	
-	//check https://mozilla.github.io/pdf.js/getting_started/
-	version: 'v1.10.100'
-}
-```
-### *pagerender* (callback)
-If you need another format except raw text.  
-
-### *max* (number)
-Max number of page to parse. If the value is less than or equal to 0, parser renders all pages.  
-
-### *version* (string, pdf.js version)
-check [pdf.js](https://mozilla.github.io/pdf.js/getting_started/)
-
-* `'default'`
-* `'v1.9.426'`
-* `'v1.10.100'`
-* `'v1.10.88'`
-* `'v2.0.550'`
-
->*default* version is *v1.10.100*   
->[mozilla.github.io/pdf.js](https://mozilla.github.io/pdf.js/getting_started/#download)
-
-## Test
-* `mocha` or `npm test`
-* Check [test folder](https://gitlab.com/autokent/pdf-parse/tree/master/test) and [quickstart.js](https://gitlab.com/autokent/pdf-parse/blob/master/quickstart.js) for extra usages.
-
-## Support
-I use this package actively myself, so it has my top priority. You can chat on WhatsApp about any infos, ideas and suggestions.
-
-[![WhatsApp](https://img.shields.io/badge/style-chat-green.svg?style=flat&label=whatsapp)](https://api.whatsapp.com/send?phone=905063042480&text=Hi%2C%0ALet%27s%20talk%20about%20pdf-parse)
-
-### Submitting an Issue
-If you find a bug or a mistake, you can help by submitting an issue to [GitLab Repository](https://gitlab.com/autokent/pdf-parse/issues)
-
-### Creating a Merge Request
-GitLab calls it merge request instead of pull request.  
-
-* [A Guide for First-Timers](https://about.gitlab.com/2016/06/16/fearless-contribution-a-guide-for-first-timers/)
-* [How to create a merge request](https://docs.gitlab.com/ee/gitlab-basics/add-merge-request.html)
-* Check [Contributing Guide](https://gitlab.com/autokent/pdf-parse/blob/master/CONTRIBUTING.md) 
 
 ## License
+
 [MIT licensed](https://gitlab.com/autokent/pdf-parse/blob/master/LICENSE) and all it's dependencies are MIT or BSD licensed.
