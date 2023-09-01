@@ -6,7 +6,7 @@
 
 This project is based on [pdf-parse](https://gitlab.com/autokent/pdf-parse), which worked fine for me during development, but I've found some problems to run it in production, specially when I tried to use it with AWS's Lambda functions.
 
-The project import's and use the [Mozilla's PDF.js](https://mozilla.github.io/pdf.js/) library on it's latest version.
+The project import's and use the [Mozilla's PDF.js](https://mozilla.github.io/pdf.js/) library in the 1.10.100 version.
 
 ## Installation
 
